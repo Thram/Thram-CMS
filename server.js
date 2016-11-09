@@ -8,6 +8,7 @@ import mongorito from "mongorito";
 import {createWriteStream} from "fs";
 import router from "./routes";
 import config from "./config";
+
 mongorito.connect(`${config.database.host}/${config.database.name}`);
 
 const app             = new Koa(),
