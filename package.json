@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "database": "mongod --dbpath ./db/data",
+    "build": "webpack",
     "server": "nodemon index.js",
     "start": "npm-run-all --parallel server database",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,6 +25,13 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "html-webpack-plugin": "^2.24.1",
     "html-webpack-template": "^5.4.1",
+    "koa": "^2.0.0",
+    "koa-bodyparser": "^3.2.0",
+    "koa-morgan": "^1.0.1",
+    "koa-router": "^7.0.1",
+    "koa-socket": "^4.4.0",
+    "koa-static": "^3.0.0",
+    "mongorito": "^2.2.0",
     "node-sass": "^3.11.2",
     "nodemon": "^1.11.0",
     "redux-devtools": "^3.3.1",
@@ -37,13 +45,6 @@
     "webpack-visualizer-plugin": "^0.1.5"
   },
   "dependencies": {
-    "koa": "^2.0.0",
-    "koa-bodyparser": "^3.2.0",
-    "koa-morgan": "^1.0.1",
-    "koa-router": "^7.0.1",
-    "koa-socket": "^4.4.0",
-    "koa-static": "^3.0.0",
-    "mongorito": "^2.2.0",
     "react": "^15.3.2",
     "react-addons-update": "^15.3.2",
     "react-dom": "^15.3.2",

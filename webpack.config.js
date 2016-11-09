@@ -1,5 +1,4 @@
 const path              = require('path'),
-      HtmlwebpackPlugin = require('html-webpack-plugin'),
       merge             = require('webpack-merge'),
       webpack           = require('webpack'),
       CleanPlugin       = require('clean-webpack-plugin'),
@@ -10,9 +9,8 @@ const pkg = require('./package.json');
 
 const TARGET = process.env.npm_lifecycle_event,
       PATHS  = {
-        app  : path.join(__dirname, 'client'),
         build: path.join(__dirname, 'public'),
-        style: path.join(__dirname, 'client/styles/main.scss')
+        style: path.join(__dirname, 'themes')
       },
       ENV    = {
         host: process.env.HOST || 'localhost',
@@ -23,7 +21,7 @@ process.env.BABEL_ENV = TARGET;
 
 const common = {
   entry  : {
-    app: PATHS.app
+    client: '/'
   },
   resolve: {
     extensions: ['', '.js', '.jsx']
@@ -40,15 +38,7 @@ const common = {
         include: PATHS.app
       }
     ]
-  },
-  plugins: [
-    new HtmlwebpackPlugin({
-      template  : 'node_modules/html-webpack-template/index.ejs',
-      title     : 'Thram CMS',
-      appMountId: 'app',
-      inject    : false
-    })
-  ]
+  }
 };
 
 if (TARGET === 'start' || !TARGET) {
@@ -57,6 +47,9 @@ if (TARGET === 'start' || !TARGET) {
       style: PATHS.style
     },
     devtool  : "source-map", // or "inline-source-map"
+    resolve: {
+      extensions: ['.scss']
+    },
     devServer: {
       historyApiFallback: true,
       hot               : true,
