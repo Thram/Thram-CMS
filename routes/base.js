@@ -3,11 +3,11 @@
  */
 import Router from "koa-router";
 import {setBasicHeader} from "./headers";
-import {Page} from "../models/Page"
+import {spawn} from "child_process";
 import {render} from "../renderer";
 const router = new Router();
 
-router.get('/', render);
+router.get('/', (ctx, next) =>  render('client', ctx, next));
 
 router.get('/favicon.ico', (ctx, next) => {
   ctx.set("Content-Type", "image/ico");
@@ -24,9 +24,9 @@ router.get('/scripts.js', (ctx, next) => {
   setBasicHeader(ctx);
 });
 
-router.get('/:page', (ctx, next) => {
-  setBasicHeader(ctx);
-  ctx.body = ctx.params.page;
-});
+// router.get('/:page', (ctx, next) => {
+//   setBasicHeader(ctx);
+//   ctx.body = ctx.params.page;
+// });
 
 export default router;

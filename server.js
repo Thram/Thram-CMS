@@ -4,6 +4,7 @@
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
 import morgan from "koa-morgan";
+import serve from "koa-static";
 import mongorito from "mongorito";
 import {createWriteStream} from "fs";
 import router from "./routes";
@@ -18,6 +19,7 @@ const app             = new Koa(),
 app
   .use(morgan('combined', {stream: accessLogStream}))
   .use(bodyParser())
+  .use(serve(`${__dirname}/public`))
   .use(router.routes())
   .use(router.allowedMethods());
 

@@ -2,31 +2,33 @@
  * Created by Thram on 9/11/16.
  */
 import React from "react";
-import configureStore from "./store/config.prod";
-import Root from "./containers/Root.prod";
 import {renderToString} from "react-dom/server";
+import {template} from "./templates";
+import configureStoreClient from "./client/store/config.prod";
+import RootClient from "./client/containers/Root.prod";
+import configureStoreAdmin from "./admin/store/config.prod";
+import RootAdmin from "./admin/containers/Root.prod";
 
-const renderFullPage = ({html, preloadedState}) => `
-    <!doctype html>
-    <html>
-      <head>
-        <title>Thram CMS Crawling Example</title>
-      </head>
-      <body>
-        <div id="root">${html}</div>
-        <script>
-          window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
-        </script>
-        <script src="/static/bundle.js"></script>
-      </body>
-    </html>
-    `;
+const renders = {
+  client: (ctx, next) => {
 
-export const render = (ctx, next) => {
-  const store          = configureStore({}),
-        html           = renderToString(<Root store={store}/>),
-        preloadedState = store.getState();
+    const store          = configureStoreClient({}),
+          html           = renderToString(<RootClient store={store}/>),
+          preloadedState = store.getState();
 
-  // Send the rendered page back to the client
-  ctx.body = renderFullPage({html, preloadedState});
+    // Send the rendered page back to the client
+    return template({type: 'client', html, preloadedState});
+  },
+  admin : (ctx, next) => {
+    const store          = configureStoreAdmin({}),
+          html           = renderToString(<RootAdmin store={store}/>),
+          preloadedState = store.getState();
+
+    // Send the rendered page back to the client
+    return template({type: 'admin', html, preloadedState});
+  }
+};
+
+export const render = (template, ctx, next) => {
+  ctx.body = renders[template](ctx, next);
 };

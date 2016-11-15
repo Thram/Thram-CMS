@@ -9,8 +9,16 @@ const pkg = require('./package.json');
 
 const TARGET = process.env.npm_lifecycle_event,
       PATHS  = {
-        build: path.join(__dirname, 'public'),
-        style: path.join(__dirname, 'themes')
+        themes: path.join(__dirname, 'themes'),
+        admin : {
+          app  : path.join(__dirname, 'admin'),
+          theme: path.join(__dirname, 'themes/admin/main.scss')
+        },
+        client: {
+          app  : path.join(__dirname, 'client'),
+          theme: path.join(__dirname, 'themes/client/main.scss')
+        },
+        build : path.join(__dirname, 'public')
       },
       ENV    = {
         host: process.env.HOST || 'localhost',
@@ -21,7 +29,11 @@ process.env.BABEL_ENV = TARGET;
 
 const common = {
   entry  : {
-    client: '/'
+    client      : [PATHS.client.app],
+    admin       : [PATHS.admin.app],
+    vendor      : Object.keys(pkg.dependencies).filter((v) => v !== 'alt-utils'),
+    admin_theme : [PATHS.admin.theme],
+    client_theme: [PATHS.client.theme]
   },
   resolve: {
     extensions: ['', '.js', '.jsx']
@@ -35,88 +47,30 @@ const common = {
       {
         test   : /\.jsx?$/,
         loaders: ['babel?cacheDirectory'],
-        include: PATHS.app
+        include: [PATHS.admin.app, PATHS.client.app]
       }
     ]
   }
 };
 
-if (TARGET === 'start' || !TARGET) {
+if (process.env.NODE_ENV === "production") {
   module.exports = merge(common, {
-    entry    : {
-      style: PATHS.style
-    },
-    devtool  : "source-map", // or "inline-source-map"
-    resolve: {
-      extensions: ['.scss']
-    },
-    devServer: {
-      historyApiFallback: true,
-      hot               : true,
-      inline            : true,
-      progress          : true,
-
-      // display only errors to reduce the amount of output
-      stats: 'errors-only',
-
-      // parse host and port from env so this is easy
-      // to customize
-      host: ENV.host,
-      port: ENV.port
-    },
-    module   : {
-      loaders: [
-        // Define development specific CSS setup
-        {
-          test   : /\.scss$/,
-          loaders: ["style", "css?sourceMap", "sass?sourceMap"],
-          include: `${PATHS.app}/styles`
-        }
-      ]
-    },
-    plugins  : [
-      new webpack.HotModuleReplacementPlugin()
-    ]
-  });
-}
-
-if (TARGET === 'build' || TARGET === 'stats') {
-  module.exports = merge(common, {
-    entry  : {
-      vendor: Object.keys(pkg.dependencies).filter(function (v) {
-        // Exclude alt-utils as it won't work with this setup
-        // due to the way the package has been designed
-        // (no package.json main).
-        return v !== 'alt-utils';
-      }),
-      style : PATHS.style
-    },
-    output : {
-      path         : PATHS.build,
-      filename     : '[name].[chunkhash].js',
-      chunkFilename: '[chunkhash].js'
-    },
     module : {
       loaders: [
-        // Extract CSS during build
         {
           test   : /\.scss$/,
           loader : ExtractTextPlugin.extract('style', 'css!sass'),
-          include: `${PATHS.app}/styles`
+          include: PATHS.themes
         }
       ]
     },
     plugins: [
       new CleanPlugin([PATHS.build]),
-      // Output extracted CSS to a file
-      new ExtractTextPlugin('styles.[chunkhash].css'),
-      // Extract vendor and manifest files
+      new ExtractTextPlugin('[name].css'),
+      // Setting DefinePlugin affects React library size!
+      new webpack.DefinePlugin({'process.env.NODE_ENV': `"production"`}),
       new webpack.optimize.CommonsChunkPlugin({
         names: ['vendor', 'manifest']
-      }),
-      // Setting DefinePlugin affects React library size!
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': '"production"'
       }),
       new webpack.optimize.UglifyJsPlugin({
         compress: {
@@ -128,4 +82,71 @@ if (TARGET === 'build' || TARGET === 'stats') {
       })
     ]
   });
+} else {
+  module.exports = merge(common, {
+    devtool: "source-map", // or "inline-source-map"
+    module : {
+      loaders: [
+        {
+          test   : /\.scss$/,
+          loader : ExtractTextPlugin.extract('style', 'css?sourceMap!sass?sourceMap'),
+          include: PATHS.themes
+        }
+      ]
+    },
+    plugins: [
+      new CleanPlugin([PATHS.build]),
+      new ExtractTextPlugin('[name].css'),
+      // Setting DefinePlugin affects React library size!
+      new webpack.DefinePlugin({'process.env.NODE_ENV': `"development"`}),
+      new webpack.optimize.CommonsChunkPlugin({names: ['vendor', 'manifest']})
+    ]
+  });
 }
+// if (TARGET === 'build' || TARGET === 'stats') {
+//   module.exports = merge(common, {
+//     entry  : {
+//       // Exclude alt-utils as it won't work with this setup
+//       // due to the way the package has been designed
+//       // (no package.json main).
+//       vendor: Object.keys(pkg.dependencies).filter((v) => v !== 'alt-utils'),
+//       style : PATHS.style
+//     },
+//     output : {
+//       path         : PATHS.build,
+//       filename     : '[name].[chunkhash].js',
+//       chunkFilename: '[chunkhash].js'
+//     },
+//     module : {
+//       loaders: [
+//         // Extract CSS during build
+//         {
+//           test   : /\.scss$/,
+//           loader : ExtractTextPlugin.extract('style', 'css!sass'),
+//           include: `${PATHS.app}/styles`
+//         }
+//       ]
+//     },
+//     plugins: [
+//       new CleanPlugin([PATHS.build]),
+//       // Output extracted CSS to a file
+//       new ExtractTextPlugin('styles.[chunkhash].css'),
+//       // Extract vendor and manifest files
+//       new webpack.optimize.CommonsChunkPlugin({
+//         names: ['vendor', 'manifest']
+//       }),
+//       // Setting DefinePlugin affects React library size!
+//       new webpack.DefinePlugin({
+//         'process.env.NODE_ENV': '"production"'
+//       }),
+//       new webpack.optimize.UglifyJsPlugin({
+//         compress: {
+//           warnings: false
+//         }
+//       }),
+//       new Visualizer({
+//         filename: '../statistics.html'
+//       })
+//     ]
+//   });
+// }

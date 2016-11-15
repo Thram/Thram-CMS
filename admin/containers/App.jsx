@@ -5,7 +5,7 @@ class App extends Component {
 
   render = () =>(
     <div>
-      TEST!
+      ADMIN TEST!
     </div>
   );
 }
