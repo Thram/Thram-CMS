@@ -31,7 +31,7 @@ export const template = ({type, html, preloadedState}) => `
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Test layout">
         <title>Thram CMS ${type} Renderer</title>
-        <link rel="stylesheet" type="text/css" href="${type}_theme.css">
+        <link rel="stylesheet" type="text/css" href="/${type}_theme.css">
       </head>
       <body>
         <div id="root">${html}</div>
