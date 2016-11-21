@@ -1,3 +1,5 @@
+import React from "react";
+
 // <!--[if lte IE 8]>
 // <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-old-ie-min.css">
 //                             <![endif]-->
@@ -23,24 +25,22 @@
 // ga('send', 'pageview');
 // </script>
 
-export const template = ({type, html, preloadedState}) => `
-    <!doctype html>
+export const HTML = ({content, store, type}) => (
     <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="Test layout">
-        <title>Thram CMS ${type} Renderer</title>
-        <link rel="stylesheet" type="text/css" href="/${type}_theme.css">
-      </head>
-      <body>
-        <div id="root">${html}</div>
-        <script>
-          window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
-        </script>
-        <script src="/manifest.js"></script>
-        <script src="/vendor.js"></script>
-        <script src="/${type}.js"></script>
-      </body>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="description" content="Test layout"/>
+        <title>{`Thram CMS ${type} Renderer`}</title>
+        <link rel="stylesheet" type="text/css" href={`/${type}_theme.css`}/>
+    </head>
+    <body>
+    <div id="root" dangerouslySetInnerHTML={{__html: content}}/>
+    <div id="devtools"/>
+    <script dangerouslySetInnerHTML={{__html: `window.__initialState__=${JSON.stringify(store.getState())};`}}/>
+    <script src="/manifest.js"></script>
+    <script src="/vendor.js"></script>
+    <script src={`/${type}.js`}></script>
+    </body>
     </html>
-    `;
+)

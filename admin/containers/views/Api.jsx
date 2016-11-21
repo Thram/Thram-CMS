@@ -1,14 +1,14 @@
 import React, {Component} from "react";
 
-class View extends Component {
+class Api extends Component {
 
     render = () => (
         <div className="view pure-g">
             <div className="pure-u-1">
-                {this.props.children}
+                Api
             </div>
         </div>
     );
 }
 
-export default View;
+export default Api;

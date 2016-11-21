@@ -3,22 +3,33 @@
  */
 import React from "react";
 import {renderToString} from "react-dom/server";
-import {template} from "./templates";
+import {template, HTML} from "./templates";
 import configureStoreClient from "./client/store/config.prod";
-import RootClient from "./client/containers/Root.prod";
 import configureStoreAdmin from "./admin/store/config.prod";
-import RootAdmin from "./admin/containers/Root.prod";
+import {Provider} from 'react-redux';
+import {createMemoryHistory, match, RouterContext} from 'react-router';
+import {syncHistoryWithStore} from 'react-router-redux';
+import routesAdmin from './admin/modules/routes';
+import routesClient from './client/modules/routes';
+
 
 export const render = (type, ctx, next) => {
-    let store, Root;
-    switch (type) {
-        case 'admin':
-            store = configureStoreAdmin({});
-            Root = <RootAdmin store={store}/>;
-            break;
-        default:
-            store = configureStoreClient({});
-            Root = <RootClient store={store}/>;
-    }
-    ctx.body = template({type: type, html: renderToString(Root), preloadedState: store.getState()});
+    const url           = ctx.params[0],
+          memoryHistory = createMemoryHistory(url),
+          store         = type === 'admin' ? configureStoreAdmin({}) : configureStoreClient({}),
+          history       = syncHistoryWithStore(memoryHistory, store);
+    match({
+        history,
+        routes  : type === 'admin' ? routesAdmin : routesClient,
+        location: url
+    }, (error, redirectLocation, renderProps) => {
+        const content = renderToString(
+            <Provider store={store}>
+                <RouterContext {...renderProps}/>
+            </Provider>
+        );
+
+        ctx.body = `<!doctype html>${renderToString(<HTML type={type} content={content} store={store}/>)}`;
+    });
+
 };
